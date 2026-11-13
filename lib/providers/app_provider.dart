@@ -63,10 +63,10 @@ class _AppProviderWrapperState extends State<AppProviderWrapper> {
     super.initState();
     _student = widget.initialStudent ??
         const Student(
-          name: 'Sora',
+          name: 'Roy Widyadhana Prastowo',
           nim: '25.11.6571',
           programStudi: 'S1 Informatika',
-          email: 'focusonlyy1@gmail.com',
+          email: 'r.widyadhana@students.amikom.ac.id',
         );
     _notes = widget.initialNotes ?? [];
     _loadNotesFromStorage();

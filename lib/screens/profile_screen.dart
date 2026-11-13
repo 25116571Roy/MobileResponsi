@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/student.dart';
+import '../providers/app_provider.dart';
 import '../widgets/profile_card.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -15,12 +16,15 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late Student _student;
+  Student? _localStudent;
 
-  @override
-  void initState() {
-    super.initState();
-    _student = widget.initialStudent ??
+  Student _getCurrentStudent(BuildContext context) {
+    final provider = AppProvider.maybeOf(context);
+    if (provider != null) {
+      return provider.student;
+    }
+    return _localStudent ??
+        widget.initialStudent ??
         const Student(
           name: 'Roy Widyadhana Prastowo',
           nim: '25.11.6571',
@@ -29,16 +33,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
   }
 
-  void _showEditProfileDialog() {
-    final nameController = TextEditingController(text: _student.name);
-    final nimController = TextEditingController(text: _student.nim);
-    final prodiController = TextEditingController(text: _student.programStudi);
-    final emailController = TextEditingController(text: _student.email);
+  void _showEditProfileDialog(Student currentStudent) {
+    final nameController = TextEditingController(text: currentStudent.name);
+    final nimController = TextEditingController(text: currentStudent.nim);
+    final prodiController = TextEditingController(text: currentStudent.programStudi);
+    final emailController = TextEditingController(text: currentStudent.email);
     final formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Edit Profil'),
           content: SingleChildScrollView(
@@ -109,21 +113,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('Batal'),
             ),
             ElevatedButton(
               onPressed: () {
                 if (formKey.currentState?.validate() ?? false) {
-                  setState(() {
-                    _student = _student.copyWith(
-                      name: nameController.text.trim(),
-                      nim: nimController.text.trim(),
-                      programStudi: prodiController.text.trim(),
-                      email: emailController.text.trim(),
-                    );
-                  });
-                  Navigator.of(context).pop();
+                  final updatedStudent = currentStudent.copyWith(
+                    name: nameController.text.trim(),
+                    nim: nimController.text.trim(),
+                    programStudi: prodiController.text.trim(),
+                    email: emailController.text.trim(),
+                  );
+
+                  final provider = AppProvider.maybeOf(context);
+                  if (provider != null) {
+                    provider.updateStudent(updatedStudent);
+                  } else {
+                    setState(() {
+                      _localStudent = updatedStudent;
+                    });
+                  }
+
+                  Navigator.of(dialogContext).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Profil berhasil diperbarui'),
@@ -142,6 +154,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final student = _getCurrentStudent(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profil Mahasiswa'),
@@ -152,10 +166,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ProfileCard(student: _student),
+            ProfileCard(student: student),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: _showEditProfileDialog,
+              onPressed: () => _showEditProfileDialog(student),
               icon: const Icon(Icons.edit),
               label: const Text('Edit Profil'),
               style: ElevatedButton.styleFrom(

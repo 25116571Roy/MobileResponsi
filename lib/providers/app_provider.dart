@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/student.dart';
 import '../models/note.dart';
+import '../repositories/note_repository.dart';
 
 class AppProvider extends InheritedWidget {
   final Student student;
@@ -53,6 +54,7 @@ class AppProviderWrapper extends StatefulWidget {
 }
 
 class _AppProviderWrapperState extends State<AppProviderWrapper> {
+  final NoteRepository _noteRepository = NoteRepository();
   late Student _student;
   late List<Note> _notes;
 
@@ -67,6 +69,16 @@ class _AppProviderWrapperState extends State<AppProviderWrapper> {
           email: 'focusonlyy1@gmail.com',
         );
     _notes = widget.initialNotes ?? [];
+    _loadNotesFromStorage();
+  }
+
+  Future<void> _loadNotesFromStorage() async {
+    final storedNotes = await _noteRepository.getNotes();
+    if (storedNotes.isNotEmpty && mounted) {
+      setState(() {
+        _notes = storedNotes;
+      });
+    }
   }
 
   void _updateStudent(Student newStudent) {
@@ -79,12 +91,14 @@ class _AppProviderWrapperState extends State<AppProviderWrapper> {
     setState(() {
       _notes = [..._notes, note];
     });
+    _noteRepository.saveNote(note);
   }
 
   void _deleteNote(String id) {
     setState(() {
       _notes = _notes.where((note) => note.id != id).toList();
     });
+    _noteRepository.deleteNote(id);
   }
 
   @override

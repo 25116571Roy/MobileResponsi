@@ -1,16 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:responsi_profil_mahasiswa/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('NoteFormScreen validation smoke test', (WidgetTester tester) async {
+  testWidgets('App smoke test', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(const MyApp());
-    expect(find.text('Tambah Catatan Kuliah'), findsOneWidget);
-
-    await tester.tap(find.byType(ElevatedButton));
-    await tester.pump();
-
-    expect(find.text('Judul tidak boleh kosong'), findsOneWidget);
-    expect(find.text('Isi catatan tidak boleh kosong'), findsOneWidget);
+    expect(find.text('Data Publik (HTTP GET)'), findsOneWidget);
   });
 }

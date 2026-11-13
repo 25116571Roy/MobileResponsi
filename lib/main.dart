@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'config/app_config.dart';
 import 'providers/app_provider.dart';
-import 'screens/note_form_screen.dart';
+import 'screens/post_list_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AppConfig.init();
   runApp(const MyApp());
 }
 
@@ -18,7 +21,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const NoteFormScreen(),
+        home: const PostListScreen(),
       ),
     );
   }
